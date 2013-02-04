@@ -1,3 +1,6 @@
+from BinaryTree import CBOrdTree
+import copy
+
 class Puzzle:
     def __init__(self):
         self.state = []
@@ -19,7 +22,7 @@ class Puzzle:
         y = 0
         for i in self.state:
             for j in i:
-                if j == "X":
+                if j == 0:
                     return [x,y]
                 y += 1
             y = 0
@@ -28,43 +31,87 @@ class Puzzle:
     def MoveUp(self):
         pos = self.takeX();
         if pos[0] == 0:
-            print "Movimiento imposible"
             return False  
         else:
             var = self.state[pos[0]-1][pos[1]]
-            self.state[pos[0]-1][pos[1]] = "X"
+            self.state[pos[0]-1][pos[1]] = 0
             self.state[pos[0]][pos[1]] = var
             return True
     def MoveDown(self):
         pos = self.takeX();
         if pos[0] == 2:
-            print "Movimiento imposible"
             return False  
         else:
             var = self.state[pos[0]+1][pos[1]]
-            self.state[pos[0]+1][pos[1]] = "X"
+            self.state[pos[0]+1][pos[1]] = 0
             self.state[pos[0]][pos[1]] = var
             return True
     def MoveRight(self):
         pos = self.takeX();
         if pos[1] == 2:
-            print "Movimiento imposible" 
             return False 
         else:
             var = self.state[pos[0]][pos[1]+1]
-            self.state[pos[0]][pos[1]+1] = "X"
+            self.state[pos[0]][pos[1]+1] = 0
             self.state[pos[0]][pos[1]] = var  
             return True
     def MoveLeft(self):
         pos = self.takeX();
         if pos[1] == 0:
-            print "Movimiento imposible"
             return False 
         else:
             var = self.state[pos[0]][pos[1]-1]
-            self.state[pos[0]][pos[1]-1] = "X"
+            self.state[pos[0]][pos[1]-1] = 0
             self.state[pos[0]][pos[1]] = var 
-            return True     
+            return True    
+    def Manhattan(self, perfect):
+        distance = 0
+        x1 = 0
+        x2 = 0
+        y1 = 0
+        y2 = 0
+        for i in self.state:
+            x1+=1
+            y1 = 0
+            for j in i:
+                y1+=1
+                x2 = 0
+                for k in perfect.state:
+                    x2+=1
+                    y2 = 0
+                    for l in k:
+                        y2+=1
+                        if j == l and j > 0:
+                            distance += abs(x1 - x2)
+                            distance += abs(y1 - y2)
+                            x2 = 0
+                            y2 = 0 
+        return distance 
+
+    def NextStep(self,end):
+        basic = copy.deepcopy(self)
+        respuesta = copy.deepcopy(self)
+        temp = copy.deepcopy(self)
+        if self.Manhattan(end) < 1:
+            print "Terminado!"
+            
+        if(temp.MoveUp()):
+            respuesta = copy.deepcopy(temp)
+            temp = copy.deepcopy(basic)
+        if(temp.MoveDown()):
+            if (temp.Manhattan(end) < respuesta.Manhattan(end)):
+                respuesta = copy.deepcopy(temp)
+                temp = copy.deepcopy(basic)
+        if(temp.MoveLeft()):
+            if (temp.Manhattan(end) < respuesta.Manhattan(end)):
+                respuesta = copy.deepcopy(temp)
+                temp = copy.deepcopy(basic)
+        if(temp.MoveRight()):
+            if (temp.Manhattan(end) < respuesta.Manhattan(end)):
+                respuesta = copy.deepcopy(temp)
+                temp = copy.deepcopy(basic)
+        return respuesta
+        
             
                 
   
@@ -72,7 +119,25 @@ class Puzzle:
         
 
 Perfect = Puzzle()
-myPuzzle = Puzzle()
-Perfect.setNumbers( "X",1, 2, 3, 4, 5, 6, 7, 8)
-Perfect.Print()
-myPuzzle.setNumbers(7,2,4,5,"X",6,8,3,1)
+Root = Puzzle()
+Perfect.setNumbers( 0,1, 2, 3, 4, 5, 6, 7, 8)
+Root.setNumbers(7,2,4,5,0,6,8,3,1)
+Recorrido = []
+final= False
+cont = 0
+print Perfect.Manhattan(Perfect)
+while(not final):
+    Root = copy.deepcopy(Root.NextStep(Perfect))
+    Recorrido.append(Root)
+    
+    if Root.Manhattan(Perfect) < 1:
+        final = True
+    print "Movimiento: "+str(cont) 
+    cont += 1
+    Root.Print()
+    
+
+print "====END==="
+
+
+
